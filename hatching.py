@@ -14,17 +14,22 @@ def hatch(angle, coords, spacing = 1):
     try:
         x, y = coords
         rise, run =  sin(angle), cos(angle)
-        slope = rise / run
+        
+##        print(slope)
         ##    print(rise, run)
         if not (abs(angle) <= pi / 4 or abs(angle) >= 3 * pi / 4):
             # Line closer to vertical. Switch axes, x dependent on y
             x, y = y, x
-            rise, run = run, rise
-        if y % (spacing) == round((x% (spacing / (slope))) * slope):
+            rise, run = run, -rise
+        slope = rise / run
+        
+##        if y % (spacing) == round((x)) :
+        if y % (spacing) == round((x% (slope))):
             return BLACK
         else:
             return WHITE
     except: # Error condition encountered
+##        print(slope, rise, run)
         return RED
 
 def process_image(in_file, out_file):
@@ -43,11 +48,13 @@ def process_image(in_file, out_file):
 
             else:
                 normal = [n -180 for n in pixel[:3]]
-                xp = cross(normal, (0, sin(-pi/6), cos(-pi/6)))
-                angle = atan2(xp[1], xp[0])
+##                xp = cross(normal, (0, sin(-pi/6), cos(-pi/6)))
+##                angle = atan2(xp[1], xp[0])
+##                angle = atan2(normal[1], normal[0])
+                angle = atan2(normal[0], -normal[1])
                 #pi/2 + atan2(origin_x - x, origin_y - y)#
 
-                px[x, y] = hatch(angle, (x, y), 3)
+                px[x, y] = hatch(round(angle*72)/72, (x, y), 3)
                 
     #processed_im = im.point(invert)
     im.save(out_file)
@@ -58,7 +65,9 @@ def process_image(in_file, out_file):
 # "example_normals.png"
 # "sphere_normal.jpg"
 if __name__ == "__main__":
-    in_file = "norm_ex_small.png"
-    out_file = "scene hatched.png"
-    process_image(in_file, out_file)
+    from test_hatching import test_hatching
+    test_hatching()
+##    in_file = "norm_ex_small.png"
+##    out_file = "scene hatched.png"
+##    process_image(in_file, out_file)
 
