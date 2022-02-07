@@ -6,7 +6,7 @@ from constants import *
 ##in_file = "norm_ex_small.png"
 ##out_file = "hatch_test.png"
 ##process_image(in_file, out_file)
-CELL_SIZE = 128
+CELL_SIZE = 200
 ROWS = 1
 COLS = 72
 CELLS = ROWS * COLS
@@ -32,8 +32,8 @@ def test_hatching():
                     y = col * CELL_SIZE + j
 ##                    print(x, y, cell)
                     angle = (cell - CELLS // 2) * tau / CELLS
-                    px[x, y] = hatch(angle, (i, j), 2)
-    im.save("test_hatching.png")
+                    px[x, y] = hatch(angle, (i, j), 10)
+    im.save("output/test_hatching.png")
     im.close()
     print("Done")
 
