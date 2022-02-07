@@ -2,13 +2,14 @@ from hatching import hatch, process_image
 from math import tau
 from PIL import Image
 from constants import *
+#from line_field import line_field
 
 ##in_file = "norm_ex_small.png"
 ##out_file = "hatch_test.png"
 ##process_image(in_file, out_file)
-CELL_SIZE = 200
+CELL_SIZE = 100
 ROWS = 1
-COLS = 72
+COLS = 360
 CELLS = ROWS * COLS
 WIDTH = CELL_SIZE * ROWS
 HEIGHT = CELL_SIZE * COLS
@@ -32,7 +33,8 @@ def test_hatching():
                     y = col * CELL_SIZE + j
 ##                    print(x, y, cell)
                     angle = (cell - CELLS // 2) * tau / CELLS
-                    px[x, y] = hatch(angle, (i, j), 10)
+                    #x[x, y] = hatch(angle, (i, j), 2)
+                    px[x, y] = hatch(angle, (i, j), 2)
     im.save("output/test_hatching.png")
     im.close()
     print("Done")
