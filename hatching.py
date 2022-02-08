@@ -6,13 +6,25 @@ from line_field import line_field
 
 RADIUS = 60
    
+
+
 def hatch(angle, coords, spacing = 1):
     """ Return the color at this pixel
     """
-    angle = -round(angle, 10)
-    run, rise  = round(RADIUS * cos(angle)), round(RADIUS * sin(angle))
-    return BLACK if line_field(run, rise, spacing)(*coords) else WHITE
+    angle = atan2(sin(angle), cos(angle))
+    slope, rise, run = (None,)*3
+    x, y = coords
+    rise, run =  round(sin(angle), 12), round(cos(angle), 12)
+    if abs(rise) > abs(run):
+        x, y = y, -x
+        rise, run = -run, rise
+    slope = rise  / run
+    if y % (spacing+1) == (round(x * slope ))% (spacing+1):
+        return BLACK
+    else:
+        return WHITE
 
+    
 def process_image(in_file, out_file):
     im = Image.open(in_file)
     ##im = Image.open("box normal.png")

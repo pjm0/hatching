@@ -1,5 +1,6 @@
+#!usr/bin/python3
 from numpy import sqrt
-from math import atan2
+from math import atan2, pi
 from constants import TRANSPARENT
 from PIL import Image
 from hatching import hatch
@@ -13,7 +14,7 @@ def normal_shader(normal, img_coords):
 def hatched_shader(normal, img_coords):
     """
     """
-    return hatch(atan2(-normal[0], normal[1]), img_coords, 3)
+    return hatch(2*atan2(normal[1], normal[0]), img_coords, 10)
     
 
 def sphere(size, shader):
@@ -30,24 +31,18 @@ def sphere(size, shader):
             if x_2+y_2<1:
                 z=sqrt(1-(x_2+y_2))
                 px[i, j] = shader((x, y, z), (i, j))
-##                print(x, y, z, "!")
-##            else:
-##                print(x, y)
-##                px[i, j] = (int((x-1)*128), int((y-1)*128), int((z-1)*128))
     if shader == normal_shader:
-        im.save("input/sphere_{}.normal.png".format(size))
+        path = "input/sphere_{}.normal.png".format(size)
     elif shader == hatched_shader:
-        im.save("output/sphere_{}.hatched.png".format(size))
-    print("Done")
+        path = "output/sphere_{}.hatched.png".format(size)
+    try:
+        im.save(path)
+        print(path)
+    except:
+        print("Failed to write to", path)
 
-sphere(300, hatched_shader)
-##if __name__ == "__main__":
-##    from sys import argv
-##    print(argv)
-##    ##im = Image.open("box normal.png")
-##    im = Image.new(mode="RGBA", size=(size, size))
-    
-            
-
+if __name__ == "__main__":
+    from sys import argv
+    sphere(1000, hatched_shader)
 
     

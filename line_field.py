@@ -40,6 +40,13 @@ def line_field(run, rise, spacing = 1):
     _cache[rise, run, spacing] = f
     return f
 
+def hatch_bresenham(angle, coords, spacing = 1):
+    """ Return the color at this pixel
+    """
+    angle = -round(angle, 10)
+    run, rise  = round(RADIUS * cos(angle)), round(RADIUS * sin(angle))
+    return BLACK if line_field(run, rise, spacing)(*coords) else WHITE
+
 if __name__ == "__main__":
 ##    from test_hatching import test_hatching
 ##    test_hatching()
