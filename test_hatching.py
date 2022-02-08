@@ -9,11 +9,11 @@ from constants import *
 ##process_image(in_file, out_file)
 CELL_SIZE = 100
 ROWS = 1
-COLS = 360
+COLS = 72
 CELLS = ROWS * COLS
 WIDTH = CELL_SIZE * ROWS
 HEIGHT = CELL_SIZE * COLS
-
+SPACING = 1
 
 def test_hatching():
     im = Image.new(mode="RGB", size=(WIDTH, HEIGHT))
@@ -34,7 +34,7 @@ def test_hatching():
 ##                    print(x, y, cell)
                     angle = (cell - CELLS // 2) * tau / CELLS
                     #x[x, y] = hatch(angle, (i, j), 2)
-                    px[x, y] = hatch(angle, (i, j), 2)
+                    px[x, y] = hatch(angle, (i, j), SPACING)
     im.save("output/test_hatching.png")
     im.close()
     print("Done")
