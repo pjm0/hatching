@@ -8,8 +8,8 @@ from constants import *
 ##out_file = "hatch_test.png"
 ##process_image(in_file, out_file)
 CELL_SIZE = 100
-ROWS = 16
-COLS = 72
+ROWS = 4
+COLS = 360
 CELLS = ROWS
 WIDTH = CELL_SIZE * ROWS
 HEIGHT = CELL_SIZE * COLS
@@ -32,7 +32,7 @@ def test_hatching():
                 for j in range(CELL_SIZE):
                     y = col * CELL_SIZE + j
 ##                    print(x, y, cell)
-                    angle = (cell - CELLS // 2) * tau / CELLS
+                    angle = (col - COLS // 2) * tau / COLS
                     #x[x, y] = hatch(angle, (i, j), 2)
                     px[x, y] = hatch(angle, (i, j), spacing)
     im.save("output/test_hatching.png")
