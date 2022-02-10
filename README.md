@@ -1,7 +1,8 @@
 # hatching
 Generate hatched shading from normal maps. With curved surfaces there can be some moire effects with fractal properties.
 
-```./hatching.py --help
+```
+./hatching.py --help
 usage: hatching.py [-h] [-x] [--h_spacing line_width line_gap]
                    [--v_spacing line_width line_gap]
                    filename [filename ...]
@@ -20,7 +21,8 @@ optional arguments:
   --v_spacing line_width line_gap
                         Spacing of vertical lines and gaps.
 ```
-```* ./sphere.py --help
+```
+./sphere.py --help
 usage: sphere.py [-h] [--h_spacing line_width line_gap]
                  [--v_spacing line_width line_gap] [-x] [-n]
                  size
