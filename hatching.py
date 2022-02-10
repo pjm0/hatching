@@ -49,10 +49,17 @@ def process_image(in_file, out_file, spacing=(1, 1)):
 
 if __name__ == "__main__":
     from sys import argv, stderr
-    for in_file in argv[1:]:
+    try:
+        line_width = int(argv[1])
+        line_gap = int(argv[2])
+    except:
+        print("Usage: {} line_width line_gap file ...", file=stderr)
+        exit(-1)
+    for in_file in argv[3:]:
         try:
             out_file = "{}.hatch.png".format(in_file)
-            process_image(in_file, out_file, (1, 3))
+            process_image(in_file, out_file, (line_width, line_gap))
         except:
-            print("Failed to process", in_file, file=stderr)
+            exit(-1)
+    exit(0)
 
