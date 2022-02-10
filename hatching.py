@@ -29,8 +29,10 @@ def hatched_shader(normal, img_coords, spacing = (1, 1)):
     """
     horizontals = cross(normal, UP)
     verticals = cross(normal, horizontals)
-    return BLACK if (hatch(quantize(atan2(horizontals[1], horizontals[0])), img_coords, spacing)
-                     or hatch(quantize(atan2(verticals[1], verticals[0])), img_coords, spacing)) else WHITE    
+    return BLACK if (hatch(atan2(horizontals[1], horizontals[0]), img_coords, spacing)
+                     or hatch(atan2(verticals[1], verticals[0]), img_coords, spacing)) else WHITE    
+##    return BLACK if (hatch(quantize(atan2(horizontals[1], horizontals[0])), img_coords, spacing)
+##                     or hatch(quantize(atan2(verticals[1], verticals[0])), img_coords, spacing)) else WHITE    
 
 def process_image(in_file, out_file, spacing=(1, 1)):
     im = Image.open(in_file)
