@@ -1,5 +1,8 @@
 from math import cos, sin, pi
 
+DEFAULT_H_SPACING = 1, 4
+DEFAULT_V_SPACING = 0, 1
+
 TRANSPARENT = (0, 0, 0, 0)
 BLACK = (0, 0, 0, 255)
 WHITE = (255, 255, 255, 255)

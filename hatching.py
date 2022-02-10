@@ -8,7 +8,7 @@ def quantize(angle):
     return tau/36*round(36 * angle/tau)
 
 def hatch(angle, coords, spacing=(1, 1)):
-    """ Return the color at this pixel
+    """ Does this pixel fall on a line in the hatching pattern?
     """
     width, gap = spacing
     period = (width + gap)
@@ -24,17 +24,23 @@ def hatch(angle, coords, spacing=(1, 1)):
     else:
         return False
     
-def hatched_shader(normal, img_coords, spacing = (1, 1)):
-    """
+def hatched_shader(normal, img_coords, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False):
+    """ Combine vertical and horizontal hatching patterns to determine
+    the color at this pixel.
     """
     horizontals = cross(normal, UP)
     verticals = cross(normal, horizontals)
-    return BLACK if (hatch(atan2(horizontals[1], horizontals[0]), img_coords, spacing)
-                     or hatch(atan2(verticals[1], verticals[0]), img_coords, spacing)) else WHITE    
-##    return BLACK if (hatch(quantize(atan2(horizontals[1], horizontals[0])), img_coords, spacing)
-##                     or hatch(quantize(atan2(verticals[1], verticals[0])), img_coords, spacing)) else WHITE    
+    on_horizontal = hatch(atan2(horizontals[1], horizontals[0]), img_coords, h_spacing)
+    on_vertical = hatch(atan2(verticals[1], verticals[0]), img_coords, v_spacing)
+    if xor_mode:
+        pixel_on = on_horizontal != on_vertical
+    else:
+        pixel_on = on_horizontal or on_vertical
+    return BLACK if pixel_on else WHITE    
 
-def process_image(in_file, out_file, spacing=(1, 1)):
+def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False):
+    """ Process a normal map image and output an image shaded with hatching lines.
+    """
     im = Image.open(in_file)
     px = im.load()
     origin_x = im.size[0]//2
@@ -43,25 +49,35 @@ def process_image(in_file, out_file, spacing=(1, 1)):
         if x % 10 == 0:
             print("Line {} / {}".format(x, im.size[0]))
         for y in range(im.size[1]):
-            normal = [n -128 for n in px[x, y][:3]]
-            px[x, y] = hatched_shader(normal, (x,y), spacing)
+            if px[x, y][3] != 0: # Process only non-transparent pixels
+                normal = [n -128 for n in px[x, y][:3]]
+                px[x, y] = hatched_shader(normal, (x,y), h_spacing, v_spacing)
     im.save(out_file)
     im.close()
     print("Done")
 
 if __name__ == "__main__":
     from sys import argv, stderr
-    try:
-        line_width = int(argv[1])
-        line_gap = int(argv[2])
-    except:
-        print("Usage: {} line_width line_gap file ...", file=stderr)
-        exit(-1)
-    for in_file in argv[3:]:
-        try:
-            out_file = "{}.hatch.png".format(in_file)
-            process_image(in_file, out_file, (line_width, line_gap))
-        except:
-            exit(-1)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Convert a normal map image to crosshatched pixel art.')
+    parser.add_argument('filenames', metavar='filename', type=str, nargs='+',
+                        help='An image file representing a normal map')
+    parser.add_argument('-x', '--xor', dest='xor_mode', action='store_const',
+                        const=True, default=False,
+                        help='Combine vertical and horizontal line fields with XOR. Default is OR.')
+    parser.add_argument('--h_spacing', metavar=('line_width', 'line_gap'), type=int, nargs=2,
+                        help='Spacing of horizontal lines and gaps.')
+    parser.add_argument('--v_spacing', metavar=('line_width', 'line_gap'), type=int, nargs=2,
+                        help='Spacing of vertical lines and gaps.')
+
+    args = parser.parse_args()
+    #print(args.accumulate(args.filenames))
+    h_spacing = args.h_spacing if args.h_spacing != None else DEFAULT_H_SPACING
+    v_spacing = args.v_spacing if args.v_spacing != None else DEFAULT_V_SPACING
+    
+    for in_file in args.filenames:
+        out_file = "{}.hatch.png".format(in_file)
+        process_image(in_file, out_file, h_spacing, v_spacing, args.xor_mode)
     exit(0)
 
