@@ -1,6 +1,5 @@
 # hatching
 Generate hatched shading from normal maps. With curved surfaces there can be some moire effects with fractal properties.
-
 ```
 ./hatching.py --help
 usage: hatching.py [-h] [-x] [--h_spacing line_width line_gap]
@@ -23,8 +22,8 @@ optional arguments:
 ```
 ```
 ./sphere.py --help
-usage: sphere.py [-h] [--h_spacing line_width line_gap]
-                 [--v_spacing line_width line_gap] [-x] [-n]
+usage: sphere.py [-h] [-r ROTATION] [--h_spacing line_width line_gap]
+                 [--v_spacing line_width line_gap] [-x] [-n] [-s]
                  size
 
 Generate an image representing a 3d sphere.
@@ -34,6 +33,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  -r ROTATION           Rotation of hatch lines in degrees.
   --h_spacing line_width line_gap
                         Spacing of horizontal lines and gaps.
   --v_spacing line_width line_gap
@@ -42,3 +42,5 @@ optional arguments:
                         Default is OR.
   -n                    Output a normal map image. Default is to generate a
                         crosshatched image.
+  -s                    Output a spherical grid.
+```

@@ -1,0 +1,14 @@
+#! /bin/bash
+2>&1
+demarc='```'
+readme=README.md
+echo \# hatching >$readme
+echo Generate hatched shading from normal maps. With curved surfaces there can be some moire effects with fractal properties.>>$readme
+for fn in ./hatching.py ./sphere.py
+do
+    cmd="$fn --help"
+    echo $demarc >>$readme
+    echo $cmd >>$readme
+    $cmd >>$readme
+    echo $demarc >>$readme
+done
