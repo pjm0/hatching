@@ -1,0 +1,10 @@
+#! /bin/bash
+for i in {0..178..2}
+do
+    echo $i / 180
+    ~/hatching/sphere.py $1 --h_spacing $2 $2 --v_spacing $2 $2 -x -r $i >/dev/null&
+    ~/hatching/sphere.py $1 --h_spacing $2 $2 --v_spacing $2 $2 -x -r `expr $i + 1` >/dev/null
+done
+#convert -delay 10 -loop 0 *.png animation.gif
+ffmpeg --stream_loop 20 -r 30 -i sphere.$1.h\($2\,\ $2\).v\($2\,\ $2\).xor.r%03d.png -c:v libx264 -vf fps=30 -pix_fmt yuv420p sphere.$1.h\($2\,$2\).v\($2\,$2\).xor.mp4
+echo Done
