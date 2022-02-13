@@ -5,12 +5,25 @@ from constants import *
 from PIL import Image
 import hatching
 from hatching import hatch, hatched_shader
-
+TICKS = 3600
 def normal_shader(normal, img_coords, h_spacing=None, v_spacing=None):
     """ Outputs a normal map.
     """
     x, y, z = normal
     return (int(x*128)+128, int(y*128)+128, int(z*128)+128)
+
+
+def spherecoord_shader(normal, img_coords, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0):
+    """ Outputs a spherical grid.
+    """
+    # Rotate normal around x
+    x = normal[0]
+    y = normal[1] * cos(-pi/6) - normal[2] * sin(-pi/6)
+    z = normal[1] * cos(-pi/6) + normal[2] * sin(-pi/6)
+    
+    lat = round(atan2(x, z)/tau*TICKS)
+    lon = round(atan2(y, 1)/tau*TICKS)
+    return hatched_shader(Z, (lon, lat), h_spacing, v_spacing, xor_mode, rotation)
 
 
 def sphere(size, shader, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0):
@@ -31,6 +44,10 @@ def sphere(size, shader, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rot
         path = "sphere_{}.normal.png".format(size)
     elif shader == hatched_shader:
         path = "sphere.{}.h{}.v{}{}{}.png".format(size, h_spacing, v_spacing,
+                                                ".xor" if xor_mode else "",
+                                                  ".r{:03d}".format(rotation))
+    elif shader == spherecoord_shader:
+        path = "sphere.{}.h{}.v{}{}{}.spherecoord.png".format(size, h_spacing, v_spacing,
                                                 ".xor" if xor_mode else "",
                                                   ".r{:03d}".format(rotation))
     try:
@@ -58,10 +75,15 @@ if __name__ == "__main__":
     parser.add_argument('-n', dest='normal_mode', action='store_const',
                         const=True, default=False,
                         help='Output a normal map image. Default is to generate a crosshatched image.')
+    parser.add_argument('-s', dest='spherecoord_mode', action='store_const',
+                        const=True, default=False,
+                        help='Output a spherical grid.')
 
     args = parser.parse_args()
     rotation = args.rotation
-    shader = normal_shader if args.normal_mode else hatched_shader
+    shader = (normal_shader if args.normal_mode \
+              else spherecoord_shader if args.spherecoord_mode \
+              else hatched_shader)
     h_spacing = args.h_spacing if args.h_spacing != None else DEFAULT_H_SPACING
     v_spacing = args.v_spacing if args.v_spacing != None else DEFAULT_V_SPACING
     sphere(args.size, shader, tuple(h_spacing), tuple(v_spacing), args.xor_mode, args.rotation)
