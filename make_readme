@@ -12,4 +12,4 @@ do
     $cmd >>$readme
     echo $demarc >>$readme
 done
-echo '<iframe width="1288" height="496" src="https://www.youtube.com/embed/4Kz_gQi5OWE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'>>$readme
+echo 'https://www.youtube.com/embed/4Kz_gQi5OWE'>>$readme

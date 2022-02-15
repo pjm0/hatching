@@ -45,4 +45,4 @@ optional arguments:
                         crosshatched image.
   -s                    Output a spherical grid.
 ```
-<iframe width="1288" height="496" src="https://www.youtube.com/embed/4Kz_gQi5OWE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+https://www.youtube.com/embed/4Kz_gQi5OWE
