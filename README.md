@@ -3,7 +3,7 @@ Generate hatched shading from normal maps. With curved surfaces there can be som
 ```
 ./hatching.py --help
 usage: hatching.py [-h] [-x] [--h_spacing line_width line_gap]
-                   [--v_spacing line_width line_gap]
+                   [--v_spacing line_width line_gap] [-s]
                    filename [filename ...]
 
 Convert a normal map image to crosshatched pixel art.
@@ -19,6 +19,7 @@ optional arguments:
                         Spacing of horizontal lines and gaps.
   --v_spacing line_width line_gap
                         Spacing of vertical lines and gaps.
+  -s                    Use spherical coordinates to generate a grid.
 ```
 ```
 ./sphere.py --help
@@ -44,3 +45,4 @@ optional arguments:
                         crosshatched image.
   -s                    Output a spherical grid.
 ```
+<iframe width="1288" height="496" src="https://www.youtube.com/embed/4Kz_gQi5OWE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

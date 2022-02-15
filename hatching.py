@@ -38,9 +38,26 @@ def hatched_shader(normal, img_coords, h_spacing=(1, 1), v_spacing=(0, 1), xor_m
         pixel_on = on_horizontal != on_vertical
     else:
         pixel_on = on_horizontal or on_vertical
-    return BLACK if pixel_on else WHITE    
+    return BLACK if pixel_on else WHITE
 
-def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0):
+def spherecoord_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rotation=0):
+    """ Outputs a spherical grid.
+    """
+    angle = -rotation*tau/360
+    divisions, width_ratio = spacing
+    # Rotate normal around x
+    x = normal[0]
+    y = -normal[1] * sin(angle) - normal[2] * cos(angle)
+    z = (-normal[1] * cos(angle) + normal[2] * sin(angle))
+
+    lat = atan2(y, x)
+    lon = acos(z)
+    on_lat_line = abs(lat % (tau / divisions)) < tau / divisions / width_ratio
+    on_lon_line = abs(lon % (tau / divisions)) < tau / divisions / width_ratio
+    return BLACK if ((on_lat_line != on_lon_line) if xor_mode else (on_lat_line or on_lon_line)
+                     ) else WHITE
+
+def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0, shader=spherecoord_shader):
     """ Process a normal map image and output an image shaded with hatching lines.
     """
     im = Image.open(in_file)
@@ -53,7 +70,10 @@ def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mod
         for y in range(im.size[1]):
             if len(px[x, y])<4 or px[x, y][3] != 0: # Process only non-transparent pixels
                 normal = [n -128 for n in px[x, y][:3]]
-                px[x, y] = hatched_shader(normal, (x,y), h_spacing, v_spacing)
+                magnitude = sqrt(sum(n**2 for n in normal))
+                normal = [n / magnitude for n in normal]
+                #px[x, y] = hatched_shader(normal, (x,y), h_spacing, v_spacing)
+                px[x, y] = spherecoord_shader(normal, (x,y), spacing=(24, 10), xor_mode=False, rotation=0)
     im.save(out_file)
     im.close()
     print("Done")
@@ -72,6 +92,9 @@ if __name__ == "__main__":
                         help='Spacing of horizontal lines and gaps.')
     parser.add_argument('--v_spacing', metavar=('line_width', 'line_gap'), type=int, nargs=2,
                         help='Spacing of vertical lines and gaps.')
+    parser.add_argument('-s', dest='spherecoord_mode', action='store_const',
+                        const=True, default=False,
+                        help='Use spherical coordinates to generate a grid.')
 
     args = parser.parse_args()
     h_spacing = args.h_spacing if args.h_spacing != None else DEFAULT_H_SPACING

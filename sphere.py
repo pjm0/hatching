@@ -1,10 +1,10 @@
 #! /usr/bin/python3
 from numpy import sqrt, cross
-from math import atan2, pi, tau
+from math import acos, atan2, pi, tau
 from constants import *
 from PIL import Image
 import hatching
-from hatching import hatch, hatched_shader
+from hatching import hatch, hatched_shader, spherecoord_shader
 TICKS = 3600
 def normal_shader(normal, img_coords, h_spacing=None, v_spacing=None):
     """ Outputs a normal map.
@@ -13,17 +13,7 @@ def normal_shader(normal, img_coords, h_spacing=None, v_spacing=None):
     return (int(x*128)+128, int(y*128)+128, int(z*128)+128)
 
 
-def spherecoord_shader(normal, img_coords, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0):
-    """ Outputs a spherical grid.
-    """
-    # Rotate normal around x
-    x = normal[0]
-    y = normal[1] * cos(-pi/6) - normal[2] * sin(-pi/6)
-    z = normal[1] * cos(-pi/6) + normal[2] * sin(-pi/6)
-    
-    lat = round(atan2(x, z)/tau*TICKS)
-    lon = round(atan2(y, 1)/tau*TICKS)
-    return hatched_shader(Z, (lon, lat), h_spacing, v_spacing, xor_mode, rotation)
+##    return hatched_shader(Z, (lon, lat), h_spacing, v_spacing, xor_mode, 0)
 
 
 def sphere(size, shader, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0):
@@ -39,7 +29,10 @@ def sphere(size, shader, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rot
             #print(x, y)
             if x_2+y_2<1:
                 z=sqrt(1-(x_2+y_2))
-                px[i, j] = shader((x, y, z), (i, j), h_spacing, v_spacing, xor_mode, rotation)
+                if shader == spherecoord_shader:
+                    px[i, j] = shader((x, y, z), (i, j), (60, 2), xor_mode, rotation)
+                else:
+                    px[i, j] = shader((x, y, z), (i, j), h_spacing, v_spacing, xor_mode, rotation)
     if shader == normal_shader:
         path = "sphere_{}.normal.png".format(size)
     elif shader == hatched_shader:
@@ -47,9 +40,7 @@ def sphere(size, shader, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rot
                                                 ".xor" if xor_mode else "",
                                                   ".r{:03d}".format(rotation))
     elif shader == spherecoord_shader:
-        path = "sphere.{}.h{}.v{}{}{}.spherecoord.png".format(size, h_spacing, v_spacing,
-                                                ".xor" if xor_mode else "",
-                                                  ".r{:03d}".format(rotation))
+        path = "sphere.{}{}.png".format(size, ".r{:03d}".format(rotation))
     try:
         im.save(path)
         print(path)
@@ -86,7 +77,7 @@ if __name__ == "__main__":
               else hatched_shader)
     h_spacing = args.h_spacing if args.h_spacing != None else DEFAULT_H_SPACING
     v_spacing = args.v_spacing if args.v_spacing != None else DEFAULT_V_SPACING
-    sphere(args.size, shader, tuple(h_spacing), tuple(v_spacing), args.xor_mode, args.rotation)
+    sphere(args.size, shader, tuple(h_spacing), tuple(v_spacing), True, args.rotation)
 
                                               
                                     

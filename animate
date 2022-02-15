@@ -1,10 +1,19 @@
 #! /bin/bash
-for i in {0..178..2}
+FPS=60
+DEGREES=360
+THREADS=4
+PROG=~/hatching/sphere.py
+I_MAX=`expr $DEGREES - $THREADS`
+J_MAX=`expr $THREADS - 1`
+
+for i in `seq 0 $THREADS $I_MAX`
 do
-    echo $i / 180
-    ~/hatching/sphere.py $1 --h_spacing $2 $2 --v_spacing $2 $2 -x -r $i >/dev/null&
-    ~/hatching/sphere.py $1 --h_spacing $2 $2 --v_spacing $2 $2 -x -r `expr $i + 1` >/dev/null
+    echo $i / $DEGREES
+    $PROG $@ -r $i >/dev/null
+    for j in `seq 1 $J_MAX`
+    do
+        $PROG $@ -r `expr $i + $j` >/dev/null&       
+    done
 done
-#convert -delay 10 -loop 0 *.png animation.gif
-ffmpeg --stream_loop 20 -r 30 -i sphere.$1.h\($2\,\ $2\).v\($2\,\ $2\).xor.r%03d.png -c:v libx264 -vf fps=30 -pix_fmt yuv420p sphere.$1.h\($2\,$2\).v\($2\,$2\).xor.mp4
+ffmpeg -stream_loop 20 -r $FPS -i sphere.$1.r%03d.png -c:v libx264 -vf fps=$FPS -pix_fmt yuv420p sphere.$1.mp4
 echo Done
