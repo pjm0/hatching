@@ -1,12 +1,12 @@
 #! /usr/bin/python3
 from PIL import Image
 from math import *
-from numpy import cross
+from numpy import cross, dot
 from constants import *
 
 #rotation = 0 # Global rotation adjust in degrees (so this property can be animated)
 
-def quantize(angle):
+def normalize(vector):
     return tau/36*round(36 * angle/tau)
 
 def hatch(angle, coords, spacing=(1, 1), rotation=0):
@@ -40,22 +40,49 @@ def hatched_shader(normal, img_coords, h_spacing=(1, 1), v_spacing=(0, 1), xor_m
         pixel_on = on_horizontal or on_vertical
     return BLACK if pixel_on else WHITE
 
+##def spherecoord_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rotation=0):
+##    """ Outputs a spherical grid.
+##    """
+##    angle = -rotation*tau/360
+##    divisions, width_ratio = spacing
+##    # Rotate normal around x
+##    x = normal[0]
+##    y = -normal[1] * sin(angle) - normal[2] * cos(angle)
+##    z = (-normal[1] * cos(angle) + normal[2] * sin(angle))
+##
+##    lat = atan2(y, x)
+##    lon = acos(z)
+##    on_lat_line = abs(lat % (tau / divisions)) < tau / divisions / width_ratio
+##    on_lon_line = abs(lon % (tau / divisions)) < tau / divisions / width_ratio
+##    return BLACK if ((on_lat_line != on_lon_line) if xor_mode else (on_lat_line or on_lon_line)
+##                     ) else WHITE
 def spherecoord_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rotation=0):
     """ Outputs a spherical grid.
     """
-    angle = -rotation*tau/360
-    divisions, width_ratio = spacing
+    BRIGHT_ADJUST = 0.5
+    angle = rotation*tau/360
+    divisions = 32
+    
     # Rotate normal around x
     x = normal[0]
-    y = -normal[1] * sin(angle) - normal[2] * cos(angle)
-    z = (-normal[1] * cos(angle) + normal[2] * sin(angle))
+    y = normal[1] * sin(angle) - normal[2] * cos(angle)
+    z = (normal[1] * cos(angle) + normal[2] * sin(angle))
+    light_source = 1, 0, 1
+    # Rotate light source around z
+    l_x = light_source[0] * sin(angle) - light_source[1] * cos(angle)#normal[0]
+    l_y = (light_source[0] * cos(angle) + light_source[1] * sin(angle))
+    l_z = light_source[2]#
+    
+    brightness = dot(normal, (l_x, l_y, l_z))
+    brightness = (brightness - 0.5) * BRIGHT_ADJUST + 0.5
+    lon = atan2(y, x)
+    lat = acos(z)
+    #gray=(floor(brightness*255),)*3
+    on_lat_line = abs(lat % (tau / divisions)) > tau / divisions * brightness
+    #on_lon_line = abs(lon % (tau / divisions)) > tau / divisions * brightness
 
-    lat = atan2(y, x)
-    lon = acos(z)
-    on_lat_line = abs(lat % (tau / divisions)) < tau / divisions / width_ratio
-    on_lon_line = abs(lon % (tau / divisions)) < tau / divisions / width_ratio
-    return BLACK if ((on_lat_line != on_lon_line) if xor_mode else (on_lat_line or on_lon_line)
-                     ) else WHITE
+    
+    return BLACK if (on_lat_line) else WHITE
 
 def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0, shader=spherecoord_shader):
     """ Process a normal map image and output an image shaded with hatching lines.
@@ -73,7 +100,7 @@ def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mod
                 magnitude = sqrt(sum(n**2 for n in normal))
                 normal = [n / magnitude for n in normal]
                 #px[x, y] = hatched_shader(normal, (x,y), h_spacing, v_spacing)
-                px[x, y] = spherecoord_shader(normal, (x,y), spacing=(24, 10), xor_mode=False, rotation=0)
+                px[x, y] = spherecoord_shader(normal, (x,im.size[1]-y), spacing=(8, 10), xor_mode=False, rotation=0)
     im.save(out_file)
     im.close()
     print("Done")
