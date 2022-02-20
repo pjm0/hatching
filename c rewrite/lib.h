@@ -1,27 +1,27 @@
 /***** Structs *****/
 
-typedef struct ScreenXY {
-    int x, y;
+typedef struct ScreenXY
+{   int x, y;
 } ScreenCoords;
 
-typedef struct Vec3 {
-    double v[3];
+typedef struct Vec3
+{   double v[3];
 } Vec3;
 
-typedef struct SphereCoords {
-    double v[2];
+typedef struct SphereCoords
+{   double v[2];
 } SphereCoords;
 
-typedef struct Mat4x4 {
-    double m[4][4];
+typedef struct Mat4x4
+{   double m[4][4];
 } Mat4x4;
 
-typedef struct RGB24 {
-    unsigned char rgb[3];
+typedef struct RGB24
+{   unsigned char rgb[3];
 } RGB24;
 
-typedef struct ShadeContext {
-    int latSections;
+typedef struct ShadeContext
+{   int latSections;
     int lonSections;
     double contrast;
     Vec3 normal;
@@ -63,3 +63,12 @@ void vec3ToSphereCoords (SphereCoords *s, Vec3 *v);
 
 void shadeSphereGrid(RGB24 *colorOut, ShadeContext *context);
 
+void shadeGrayScale(RGB24 *colorOut, ShadeContext *context);
+
+/***** Argument processing function declarations *****/
+
+int initContext(ShadeContext *context, int argc, char **argv);
+
+/***** Image processing function declarations *****/
+
+void processNormalMap(char *inFN, char *outFN, ShadeContext *context, void *shader(SphereCoords *, Vec3 *)) ;

@@ -1,4 +1,4 @@
-all: hatching
+all: sphere
 
-hatching: shader.c shader.h main.c lib.c lib.h
-	gcc -o hatching lib.c shader.c main.c -lm
+sphere: shader.c sphere.c lib.c lib.h
+	gcc -o hatching lib.c shader.c sphere.c -lm
