@@ -1,0 +1,20 @@
+#! /bin/bash
+FPS=60
+DEGREES=360
+THREADS=1
+PROG=~/hatching/c\ rewrite/hatching
+I_MAX=`expr $DEGREES - $THREADS`
+J_MAX=`expr $THREADS - 1`
+
+for i in `seq 0 $THREADS $I_MAX`
+do
+    echo $i / $DEGREES
+    "$PROG" 1000 360 1 0 0 $i 15
+    # $PROG $@ -r $i >/dev/null
+    # for j in `seq 1 $J_MAX`
+    # do
+    #     $PROG $@ -r `expr $i + $j` >/dev/null&       
+    # done
+done
+# ffmpeg -stream_loop 20 -r $FPS -i sphere.$1.r%03d.png -c:v libx264 -vf fps=$FPS -pix_fmt yuv420p sphere.$1.mp4
+echo Done

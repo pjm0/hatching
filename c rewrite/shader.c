@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "lib.h"
-#include "shader.h"
 
 void shadeSphereGrid(RGB24 *colorOut, ShadeContext *context) {
     double angle = TAU / 12;

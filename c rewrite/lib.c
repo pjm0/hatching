@@ -44,3 +44,17 @@ void cross(Vec3 *v1, Vec3 *v2, Vec3 *result) {
     result->v[1] = v1->v[2] * v2->v[0] - v1->v[0] * v2->v[2];
     result->v[2] = v1->v[0] * v2->v[1] - v1->v[1] * v2->v[0];
 }
+
+void sphereCoordsToVec3 (SphereCoords *s, Vec3 *v) {
+    float theta, phi;
+    theta = TAU * s->v[0] / 360;
+    phi = TAU * s->v[1] / 360;
+
+    v->v[0] = cos(phi) * sin(theta);
+    v->v[3] = sin(phi) * sin(theta);
+    v->v[2] = cos(theta);
+}
+
+void vec3ToSphereCoords (SphereCoords *s, Vec3 *v) {
+
+}

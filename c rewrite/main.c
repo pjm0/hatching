@@ -9,26 +9,44 @@ const Vec3 DOWN = {{0, -1, 0}};
 
 int main(int argc, char **argv)
 {
-    const int size = atoi(argv[1]);
-    const int sections = atoi(argv[2]);
-    float contrast;
-    if (argc >= 3) {
-        contrast = atof(argv[3]);
-    } else {
-        contrast = 0.5;
-    }
-    char filename[100];
-    sprintf(filename, "sphere-%d-%d-%.2f.ppm", size, sections, contrast);
-    FILE *fp = fopen(filename, "wb"); /* b - binary mode */
     ShadeContext context;
-    context.latSections = sections;
-    context.lonSections = sections;
-    context.contrast = contrast;
-    context.lightDirection = DOWN;
-    context.objUp = UP;
+    SphereCoords objUp;
+    SphereCoords lightDirection;
+    int size = atoi(argv[2]);
+    context.latSections = context.lonSections = atoi(argv[3]);
+    if (argc >= 3) {
+        context.contrast = atof(argv[4]);
+    } else {
+        context.contrast = 0.5;
+    }
+    if (argc >= 7) {
+        objUp.v[0] = atof(argv[5]);
+        objUp.v[1] = atof(argv[6]);
+        sphereCoordsToVec3 (&objUp, &(context.objUp));
+        // printf("Raw parameters %s %s\n", argv[4], argv[5]);
+        // printf("Up vector from sphere coords %f %f:\n\t%f %f %f\n", objUp.v[0], objUp.v[1], context.objUp.v[0], context.objUp.v[1], context.objUp.v[2]);
+    } else {
+        context.objUp = UP;
+    }
+    if (argc >= 9) {
+        lightDirection.v[0] = atof(argv[7]);
+        lightDirection.v[1] = atof(argv[8]);
+        sphereCoordsToVec3 (&lightDirection, &(context.lightDirection));
+        // printf("Raw parameters %s %s\n", argv[4], argv[5]);
+        // printf("Light direction vector from sphere coords %f %f:\n\t%f %f %f\n", lightDirection.v[0], lightDirection.v[1], context.lightDirection.v[0], context.lightDirection.v[1], context.lightDirection.v[2]);
+    } else {
+        context.lightDirection = DOWN;
+    }
+    
+    char *filename = argv[1];/*[100];
+    sprintf(filename, "sphere %d %d %.2f %.2f %.2f %.2f %.2f.ppm",
+            size, context.latSections, context.contrast, objUp.v[0], objUp.v[1], lightDirection.v[0], lightDirection.v[1]);*/
+    printf("%s\n", filename);
+    FILE *fp = fopen(filename, "wb"); /* b - binary mode */
+
     (void) fprintf(fp, "P6\n%d %d\n255\n", size, size);
     for (int j = 0; j < size; ++j) {
-        printf("Row %d / %d\n", j, size);
+        // printf("Row %d / %d\n", j, size);
         double y = -(2*j/(double)size-1);
         double y_sq = y * y;
         for (int i = 0; i < size; ++i)
