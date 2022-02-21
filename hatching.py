@@ -5,6 +5,8 @@ from numpy import cross, dot
 from constants import *
 
 #rotation = 0 # Global rotation adjust in degrees (so this property can be animated)
+def f():
+    pass
 
 def normalize(vector):
     return tau/36*round(36 * angle/tau)
@@ -61,6 +63,34 @@ def spherecoord_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rot
     """
     BRIGHT_ADJUST = 0.5
     angle = rotation*tau/360
+    divisions = 1000000
+    
+    # Rotate normal around x
+    x = normal[0]
+    y = normal[1] * sin(angle) - normal[2] * cos(angle)
+    z = (normal[1] * cos(angle) + normal[2] * sin(angle))
+    light_source = 1, 0, 1
+    # Rotate light source around z
+    l_x = light_source[0] * sin(angle) - light_source[1] * cos(angle)#normal[0]
+    l_y = (light_source[0] * cos(angle) + light_source[1] * sin(angle))
+    l_z = light_source[2]#
+    
+    brightness = max(0, dot(normal, (l_x, l_y, l_z)))
+    brightness = (brightness - 0.5) * BRIGHT_ADJUST + 0.5
+    lon = atan2(y, x)
+    lat = acos(z)
+    #gray=(floor(brightness*255),)*3
+    on_lat_line = abs(lat % (tau / divisions)) > tau / divisions * brightness
+    #on_lon_line = abs(lon % (tau / divisions)) > tau / divisions * brightness
+
+    
+    return BLACK if (on_lat_line) else WHITE
+
+def grayscale_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rotation=0):
+    """ Outputs a spherical grid.
+    """
+    BRIGHT_ADJUST = 0.5
+    angle = rotation*tau/360
     divisions = 32
     
     # Rotate normal around x
@@ -73,16 +103,12 @@ def spherecoord_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rot
     l_y = (light_source[0] * cos(angle) + light_source[1] * sin(angle))
     l_z = light_source[2]#
     
-    brightness = dot(normal, (l_x, l_y, l_z))
+    brightness = max(0, dot(normal, (l_x, l_y, l_z)))
     brightness = (brightness - 0.5) * BRIGHT_ADJUST + 0.5
-    lon = atan2(y, x)
-    lat = acos(z)
-    #gray=(floor(brightness*255),)*3
-    on_lat_line = abs(lat % (tau / divisions)) > tau / divisions * brightness
-    #on_lon_line = abs(lon % (tau / divisions)) > tau / divisions * brightness
+
 
     
-    return BLACK if (on_lat_line) else WHITE
+    return (int(255 * brightness),)*3
 
 def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0, shader=spherecoord_shader):
     """ Process a normal map image and output an image shaded with hatching lines.
@@ -100,7 +126,7 @@ def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mod
                 magnitude = sqrt(sum(n**2 for n in normal))
                 normal = [n / magnitude for n in normal]
                 #px[x, y] = hatched_shader(normal, (x,y), h_spacing, v_spacing)
-                px[x, y] = spherecoord_shader(normal, (x,im.size[1]-y), spacing=(8, 10), xor_mode=False, rotation=0)
+                px[x, y] = f(normal, (x,im.size[1]-y), spacing=(8, 10), xor_mode=False, rotation=0)
     im.save(out_file)
     im.close()
     print("Done")
@@ -122,11 +148,14 @@ if __name__ == "__main__":
     parser.add_argument('-s', dest='spherecoord_mode', action='store_const',
                         const=True, default=False,
                         help='Use spherical coordinates to generate a grid.')
+    parser.add_argument('-g', dest='greyscale_mode', action='store_const',
+                        const=True, default=False,
+                        help='Generate greyscale image with directional lighting.')
 
     args = parser.parse_args()
     h_spacing = args.h_spacing if args.h_spacing != None else DEFAULT_H_SPACING
     v_spacing = args.v_spacing if args.v_spacing != None else DEFAULT_V_SPACING
-    
+    f = spherecoord_shader if args.spherecoord_mode else grayscale_shader if args.greyscale_mode else hatched_shader
     for in_file in args.filenames:
         out_file = "{}.hatch.png".format(in_file)
         process_image(in_file, out_file, h_spacing, v_spacing, args.xor_mode)
