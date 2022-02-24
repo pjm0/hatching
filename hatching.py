@@ -3,13 +3,30 @@ from PIL import Image
 from math import *
 from numpy import cross, dot
 from constants import *
+from random import random
 
 #rotation = 0 # Global rotation adjust in degrees (so this property can be animated)
 def f():
     pass
 
-def normalize(vector):
-    return tau/36*round(36 * angle/tau)
+def normalize(v):
+    magnitude = sqrt(sum(n**2 for n in v))
+    return [n / magnitude for n in v]
+
+def get_brightness(normal, contrast, angle = 90*tau/360):
+    # Rotate normal around x
+    x = normal[0]
+    y = normal[1] * sin(angle) - normal[2] * cos(angle)
+    z = (normal[1] * cos(angle) + normal[2] * sin(angle))
+    light_source = 1, 0, 1
+    # Rotate light source around z
+    l_x = light_source[0] * sin(angle) - light_source[1] * cos(angle)#normal[0]
+    l_y = (light_source[0] * cos(angle) + light_source[1] * sin(angle))
+    l_z = light_source[2]#
+    
+    brightness = max(0, dot(normal, (l_x, l_y, l_z)))
+    return (brightness - 0.5) * contrast + 0.5
+
 
 def hatch(angle, coords, spacing=(1, 1), rotation=0):
     """ Does this pixel fall on a line in the hatching pattern?
@@ -18,7 +35,7 @@ def hatch(angle, coords, spacing=(1, 1), rotation=0):
     period = (width + gap)
     angle += tau / 360 * rotation
     x, y = coords
-    rise, run =  round(sin(angle), 12), -round(cos(angle), 12)
+    rise, run =  round(sin(angle), 12), round(cos(angle), 12)
     if abs(rise) > abs(run):
         x, y = y, -x
         rise, run = -run, rise
@@ -27,15 +44,19 @@ def hatch(angle, coords, spacing=(1, 1), rotation=0):
         return True
     else:
         return False
-    
-def hatched_shader(normal, img_coords, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0):
+SPACING=5    
+def hatched_shader(normal, img_coords, h_spacing=(1, 1), xor_mode=False, rotation=0):
     """ Combine vertical and horizontal hatching patterns to determine
     the color at this pixel.
     """
-    horizontals = cross(normal, UP)
-    verticals = cross(normal, horizontals)
-    on_horizontal = hatch(atan2(horizontals[1], horizontals[0]), img_coords, h_spacing, rotation)
-    on_vertical = hatch(atan2(verticals[1], verticals[0]), img_coords, v_spacing, rotation)
+    brightness = round(SPACING * get_brightness(normal, 1, rotation*tau/360))
+    h_spacing = SPACING - brightness, brightness
+##    h_spacing = tuple(val / gcd(*h_spacing) for val in h_spacing)
+    
+    horizontals = normalize(cross(normal, UP))
+    verticals = normalize(cross(normal, horizontals))
+    on_horizontal = hatch(atan2(horizontals[1], horizontals[0]), img_coords, h_spacing, 0)
+    on_vertical = hatch(atan2(verticals[1], verticals[0]), img_coords, v_spacing, 0)
     if xor_mode:
         pixel_on = on_horizontal != on_vertical
     else:
@@ -58,6 +79,7 @@ def hatched_shader(normal, img_coords, h_spacing=(1, 1), v_spacing=(0, 1), xor_m
 ##    on_lon_line = abs(lon % (tau / divisions)) < tau / divisions / width_ratio
 ##    return BLACK if ((on_lat_line != on_lon_line) if xor_mode else (on_lat_line or on_lon_line)
 ##                     ) else WHITE
+
 def spherecoord_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rotation=0):
     """ Outputs a spherical grid.
     """
@@ -110,6 +132,10 @@ def grayscale_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rotat
     
     return (int(255 * brightness),)*3
 
+def rand_dithered_shader(normal, img_coords, spacing=(24, 10), xor_mode=False, rotation=0):
+    brightness = get_brightness(normal, 0.6)
+    return BLACK if brightness < random() else WHITE
+
 def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mode=False, rotation=0, shader=spherecoord_shader):
     """ Process a normal map image and output an image shaded with hatching lines.
     """
@@ -126,7 +152,7 @@ def process_image(in_file, out_file, h_spacing=(1, 1), v_spacing=(0, 1), xor_mod
                 magnitude = sqrt(sum(n**2 for n in normal))
                 normal = [n / magnitude for n in normal]
                 #px[x, y] = hatched_shader(normal, (x,y), h_spacing, v_spacing)
-                px[x, y] = f(normal, (x,im.size[1]-y), spacing=(8, 10), xor_mode=False, rotation=0)
+                px[x, y] = f(normal, (x,im.size[1]-y), (8, 10), False, 0)
     im.save(out_file)
     im.close()
     print("Done")
@@ -151,11 +177,17 @@ if __name__ == "__main__":
     parser.add_argument('-g', dest='greyscale_mode', action='store_const',
                         const=True, default=False,
                         help='Generate greyscale image with directional lighting.')
+    parser.add_argument('-r', dest='dithered_mode', action='store_const',
+                        const=True, default=False,
+                        help='Generate random dithered image with directional lighting.')
 
     args = parser.parse_args()
     h_spacing = args.h_spacing if args.h_spacing != None else DEFAULT_H_SPACING
     v_spacing = args.v_spacing if args.v_spacing != None else DEFAULT_V_SPACING
-    f = spherecoord_shader if args.spherecoord_mode else grayscale_shader if args.greyscale_mode else hatched_shader
+    f = (spherecoord_shader if args.spherecoord_mode
+         else grayscale_shader if args.greyscale_mode
+         else rand_dithered_shader if args.dithered_mode
+         else hatched_shader)
     for in_file in args.filenames:
         out_file = "{}.hatch.png".format(in_file)
         process_image(in_file, out_file, h_spacing, v_spacing, args.xor_mode)

@@ -4,9 +4,10 @@
 #include "lib.h"
 
 int main(int argc, char **argv)
-{   ShadeContext context;
-    if (initContext(&context, argc, argv) == EXIT_FAILURE)
-    {   return EXIT_FAILURE;
+{
+    ShadeContext context;
+    if (initContext(&context, argc, argv) == EXIT_FAILURE) {
+        return EXIT_FAILURE;
     }
     int size = atoi(argv[2]);
     char *filename = argv[1];/*[100];
@@ -16,24 +17,23 @@ int main(int argc, char **argv)
     FILE *fp = fopen(filename, "wb"); /* b - binary mode */
 
     (void) fprintf(fp, "P6\n%d %d\n255\n", size, size);
-    for (int j = 0; j < size; ++j)
-    {   // printf("Row %d / %d\n", j, size);
+    for (int j = 0; j < size; ++j) {
+        // printf("Row %d / %d\n", j, size);
         double y = -(2*j/(double)size-1);
         double y_sq = y * y;
-        for (int i = 0; i < size; ++i)
-        {   double x = 2*i/(double)size - 1;
+        for (int i = 0; i < size; ++i) {
+            double x = 2*i/(double)size - 1;
             double x_sq = x * x;
             //static unsigned char color[3];
             RGB24 color;
-            if (x_sq + y_sq < 1)
-            {   context.normal.v[0] = x;
+            if (x_sq + y_sq < 1) {
+                context.normal.v[0] = x;
                 context.normal.v[1] = y;
                 context.normal.v[2] = sqrt(1-x_sq - y_sq );
                 //shadeGrayScale(&color, &context);
                 shadeSphereGrid(&color, &context);
-            }
-            else
-            {   color.rgb[0] = 0;
+            } else {
+                color.rgb[0] = 0;
                 color.rgb[1] = 0;
                 color.rgb[2] = 0;
             }

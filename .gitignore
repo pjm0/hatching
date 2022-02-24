@@ -1,3 +1,25 @@
+.gitignore
+
+*.o
+*.png
+*.ppm
+*.jpg
+*.mkv
+*.avi
+*.mp4
+*.orig
+*.old
+*.pfm
+log.txt
+input/
+input/*
+output/
+output/*
+anim*/
+anim*/*
+process
+sphere
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

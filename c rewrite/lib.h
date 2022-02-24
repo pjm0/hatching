@@ -1,31 +1,36 @@
 /***** Structs *****/
 
-typedef struct ScreenXY
-{   int x, y;
+typedef struct ScreenXY {
+    int x, y;
 } ScreenCoords;
 
-typedef struct Vec3
-{   double v[3];
+typedef struct Vec3 {
+    double v[3];
 } Vec3;
 
-typedef struct SphereCoords
-{   double v[2];
+typedef struct SphereCoords {
+    double v[2];
 } SphereCoords;
 
-typedef struct Mat4x4
-{   double m[4][4];
+typedef struct Mat4x4 {
+    double m[4][4];
 } Mat4x4;
 
-typedef struct RGB24
-{   unsigned char rgb[3];
+typedef struct RGB24 {
+    unsigned char rgb[3];
 } RGB24;
 
-typedef struct ShadeContext
-{   int latSections;
+typedef struct RGB48 {
+    short rgb[3];
+} RGB48;
+
+typedef struct ShadeContext {
+    int latSections;
     int lonSections;
+    double brightness;
     double contrast;
     Vec3 normal;
-    Vec3 lightDirection;
+    Vec3 lightV;
     Vec3 objUp;
 } ShadeContext;
 
@@ -55,11 +60,23 @@ double dot(Vec3 *v1, Vec3 *v2);
 
 void cross(Vec3 *v1, Vec3 *v2, Vec3 *result);
 
+void rotateX(double rotation, Vec3 *orig, Vec3 *new);
+
+void rotateY(double rotation, Vec3 *orig, Vec3 *new);
+
+void rotateZ(double rotation, Vec3 *orig, Vec3 *new);
+
 void sphereCoordsToVec3 (SphereCoords *s, Vec3 *v);
 
 void vec3ToSphereCoords (SphereCoords *s, Vec3 *v);
 
 /***** Shader function declarations *****/
+
+void rgbToNormal(RGB24 *color, Vec3 *normal, int maxVal);
+
+void rgb48ToNormal(RGB48 *color, Vec3 *normal, int maxVal);
+
+double getBrightness(Vec3 *normal, Vec3 *lightV, double contrast);
 
 void shadeSphereGrid(RGB24 *colorOut, ShadeContext *context);
 
