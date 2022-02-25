@@ -2,7 +2,7 @@
 #include "lib.h"
 
 #define PPM_HEADER "P6\n%d %d\n%d\n"
-#define CONTRAST 1
+#define CONTRAST .8
 
 void *processNormals(char *normalFN, char *lightFN, char *outFN)
 {
@@ -26,10 +26,11 @@ void *processNormals(char *normalFN, char *lightFN, char *outFN)
             //double x = 2*i/(double)sizeW - 1;
             int n;
             ShadeContext context;
-            context.latSections = 1000;
+            context.latSections = 12;
             context.lightV.v[0] = 1;
             context.lightV.v[1] = 0;
             context.lightV.v[2] = 0;
+            normalize(&(context.lightV));
             context.contrast = CONTRAST;
             RGB24 normColor, lightColor, outColor;
             RGB48 normColor48, lightColor48;
@@ -52,7 +53,7 @@ void *processNormals(char *normalFN, char *lightFN, char *outFN)
             } else {
                 context.brightness = getBrightness(&(context.normal), &(context.lightV), context.contrast);
             }
-            shadeGrayScale(&outColor, &context);
+            shadeSphereGrid(&outColor, &context);
             (void) fwrite(&(outColor.rgb), 1, 3, output);
             // (void) fwrite(&(outColor.rgb), 1, 3, stdout;
         }

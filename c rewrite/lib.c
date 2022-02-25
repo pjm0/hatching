@@ -39,7 +39,7 @@ void scaleVector(Vec3 *v, double s)
 }
 
 /* Scale v in-place by scalar s. */
-void normalizeVector(Vec3 *v)
+void normalize(Vec3 *v)
 {
     scaleVector(v, 1 / magnitude(v));
 }
@@ -74,6 +74,25 @@ void vec3ToSphereCoords (SphereCoords *s, Vec3 *v)
 {
 
 }
+
+void rotateX(double rotation, Vec3 *orig, Vec3 *new)
+{
+    Vec3 temp;
+
+}
+
+void rotateY(double rotation, Vec3 *orig, Vec3 *new)
+{
+    Vec3 temp;
+
+}
+
+void rotateZ(double rotation, Vec3 *orig, Vec3 *new)
+{
+    Vec3 temp;
+
+}
+
 
 /***** Argument processing function declarations *****/
 
