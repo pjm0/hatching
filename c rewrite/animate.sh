@@ -1,5 +1,6 @@
 #! /bin/bash
 FRAMES=120
+REPEAT=4
 THREADS=4
 FPS=30
 FILENAME=out.avi
@@ -21,7 +22,7 @@ do
         fi
     done
 done
-ffmpeg -y -stream_loop 20 -r $FPS -i ./water/%04d.out.ppm -c:v libx264 -vf fps=$FPS -pix_fmt yuv420p $FILENAME
-rm -f ./water/*.out.ppm 
+ffmpeg -y -stream_loop $REPEAT -r $FPS -i ./water/%04d.out.ppm -c:v libx264 -vf fps=$FPS -pix_fmt yuv420p $FILENAME
+#rm -f ./water/*.out.ppm 
 echo Done
 echo "\a"
