@@ -5,8 +5,6 @@
 
 // const static RGB24 BLACK = {{0, 0, 0}};
 // const static RGB24 WHITE = {{1, 1, 1}};
-const Vec3 UP = {{0, 1, 0 } };
-const Vec3 DOWN = {{0, -1, 0 } };
 
 /* Compute matrix multiplication a x b and store the result at dest. */
 void MatMul4x4(Mat4x4 *a, Mat4x4 *b, Mat4x4 *dest)
@@ -78,19 +76,30 @@ void vec3ToSphereCoords (SphereCoords *s, Vec3 *v)
 void rotateX(double rotation, Vec3 *orig, Vec3 *new)
 {
     Vec3 temp;
+    temp.v[0] = orig->v[0];
+    temp.v[1] = orig->v[1] * sin(rotation) - orig->v[2] * cos(rotation);
+    temp.v[2] = (orig->v[1] * cos(rotation) + orig->v[2] * sin(rotation));
+    *new = temp;
+    //light_source = 1, 0, 1
 
 }
 
 void rotateY(double rotation, Vec3 *orig, Vec3 *new)
 {
     Vec3 temp;
-
+    temp.v[0] = (orig->v[2] * cos(rotation) + orig->v[0] * sin(rotation));
+    temp.v[1] = orig->v[1];
+    temp.v[2] = orig->v[2] * sin(rotation) - orig->v[0] * cos(rotation);
+    *new = temp;
 }
 
 void rotateZ(double rotation, Vec3 *orig, Vec3 *new)
 {
     Vec3 temp;
-
+    temp.v[0] = orig->v[0] * sin(rotation) - orig->v[1] * cos(rotation);
+    temp.v[1] = orig->v[0] * cos(rotation) + orig->v[1] * sin(rotation);
+    temp.v[2] = orig->v[2];
+    *new = temp;
 }
 
 

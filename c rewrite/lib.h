@@ -1,3 +1,4 @@
+
 /***** Structs *****/
 
 typedef struct ScreenXY {
@@ -34,8 +35,25 @@ typedef struct ShadeContext {
     Vec3 objUp;
 } ShadeContext;
 
+typedef struct Camera {
+    float focalDist;
+    Vec3 eye;
+    Vec3 gazePoint;
+    Mat4x4 camToWorld;
+    Mat4x4 worldToCam;
+} Camera;
+
+typedef struct PpmWrapper {
+    FILE *f;
+    int width, height, maxVal;
+} PpmWrapper;
+
 /***** Constants *****/
 
+// const Vec3 UP = {{0, 1, 0 }};
+// const Vec3 DOWN = {{0, -1, 0 }};
+// const RGB24 WHITE = {{255, 255, 255 }};
+// const RGB24 BLACK = {{0, 0, 0 }};
 
 #define TAU (2 * M_PI)
 
@@ -78,6 +96,8 @@ void rgb48ToNormal(RGB48 *color, Vec3 *normal, int maxVal);
 
 double getBrightness(Vec3 *normal, Vec3 *lightV, double contrast);
 
+void shadeRandDither(RGB24 *colorOut, ShadeContext *context);
+
 void shadeSphereGrid(RGB24 *colorOut, ShadeContext *context);
 
 void shadeGrayScale(RGB24 *colorOut, ShadeContext *context);
@@ -88,4 +108,12 @@ int initContext(ShadeContext *context, int argc, char **argv);
 
 /***** Image processing function declarations *****/
 
+int loadPpmRead(PpmWrapper *img, char *filename);
+
+int loadPpmWrite(PpmWrapper *img, char *filename);
+
 void processNormalMap(char *inFN, char *outFN, ShadeContext *context, void *shader(SphereCoords *, Vec3 *)) ;
+
+/***** Camera function declarations (camera.c) *****/
+
+void initCamera(Camera *c, float focalDist, Vec3 eye, Vec3 gazePoint);
